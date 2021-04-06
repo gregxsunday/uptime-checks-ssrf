@@ -20,6 +20,11 @@ docker run --rm -p 8000:8000 --name gcp-ssrf gcp-ssrf
 ```
 docker run --rm -p 8000:8000 gregxsunday/gcp-ssrf:latest
 ```
+
+### Terminate
+```
+docker kill gcp-ssrf
+```
 # Usage
 The app is exposed by default on http://localhost:8000
 ## Important - metadata address
