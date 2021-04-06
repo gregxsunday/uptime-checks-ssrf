@@ -70,4 +70,7 @@ Of course, this is not 1:1 replicated and there are no real GCP instances runnin
 * number of metadata instances - by default 4 instances, instead of 54. You can change it in `.env` file
 * not all options from real Uptime Checks are considered, only the relevant parameters are implemented
 * only a few endpoints from GCP metadata service are implemented, as described in former chapter. 
-# 
+
+
+# Note
+This web application is not secure and you should not expose anywhere besides your local network where only you can access it.
