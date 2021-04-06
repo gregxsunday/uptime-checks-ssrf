@@ -7,5 +7,5 @@ RUN gcc -o add_host add_host.c && chmod 4755 add_host
 COPY . /gcp-ssrf
 WORKDIR /gcp-ssrf
 RUN chown -R hacker:hacker .
-USER hacker
+# USER hacker
 CMD ["./run.sh"]
