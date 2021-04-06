@@ -16,14 +16,18 @@ cd uptime-checks-ssrf
 docker build -t gcp-ssrf .
 docker run --rm -p 8000:8000 --name gcp-ssrf gcp-ssrf
 ```
+To terminate
+```
+docker kill gcp-ssrf
+```
 ## Option 2: dockerhub
 ```
 docker run --rm -p 8000:8000 gregxsunday/gcp-ssrf:latest
 ```
-
-### Terminate
+To Terminate
 ```
-docker kill gcp-ssrf
+docker ps -a
+docker kill {CONTAINER_ID}
 ```
 # Usage
 The app is exposed by default on http://localhost:8000
