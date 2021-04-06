@@ -1,0 +1,134 @@
+{% extends "layout.html" %}
+{% block body %}
+
+
+<div class="mx-3 px-3">
+    <h1>Create Uptime Check</h1>
+    
+    <form id='uptime_check'>
+        <h3>Target</h3>
+        <div class="form-group">
+          <label for="host">Host</label>
+          <input type="text" class="form-control" id="host" aria-describedby="hostHelp" placeholder="Enter host">
+          <small id="hostlHelp" class="form-text text-muted">Remember that 169.254.169.254 doesn't work. To reach the metadata endpoint, you must use <code>metadata.google.internal</code></small>
+        </div>
+
+        <div class="form-group">
+          <label for="path">Path</label>
+          <input type="text" class="form-control" id="path" placeholder="/">
+        </div>
+
+        
+        <div class="form-check">
+            <input type="checkbox" class="form-check-input" id="ssl">
+            <label class="form-ssl-label" for="ssl">Use SSL</label>
+        </div>
+        
+        <h5>(optional) Header</h5>
+        <div class="form-group">
+            <label for="header_name">Header Name</label>
+            <input type="text" class="form-control" id="header_name">
+        </div>
+        <div class="form-group">
+            <label for="header_value">Header Value:</label>
+            <input type="text" class="form-control" id="header_value">
+        </div>
+        
+        <h3>(optional) Response Validation</h3>
+        
+        <div class="form-group">
+            <label for="sel1">Response Content Match Type</label>
+            <select class="form-control" id="matcher">
+              <option value="MATCHES_STRING">Contains string</option>
+              <option value="MATCHES_REGEX">Contains regex</option>
+            </select>
+            <br>
+        </div>
+        
+        <div class="form-group">
+            <label for="content">Response Content</label>
+            <input type="text" class="form-control" id="content" placeholder="">
+          </div>
+
+        
+        <button type="submit" class="btn btn-primary">Submit</button>
+
+      </form>
+</div>
+
+<script>
+    window.addEventListener( "load", function () {
+        function sendData() {
+            let content = document.getElementById("content").value;
+            let matcher = document.getElementById("matcher").value;
+            let host = document.getElementById("host").value;
+            let path = document.getElementById("path").value;
+            let ssl = document.getElementById("ssl").checked;
+            if (ssl){
+                var port = 443;
+            }
+            else{
+                var port = 80;
+            }
+
+            let header_name = document.getElementById("header_name").value;
+            let header_value = document.getElementById("header_value").value;
+            if (header_name !== ""){
+                var headers = { [header_name]: header_value};
+            }
+            let body = {
+                "contentMatchers": [
+                    {
+                        "content": content,
+                        "matcher": matcher
+                    }
+                ],
+                "httpCheck": {
+                    "path": path,
+                    "port": port,
+                    "requestMethod": "GET",
+                    "useSsl": ssl,
+                    "headers": headers
+                },
+                "monitoredResource": {
+                    "host": host
+                }
+            }
+            console.log(body);
+            const xhr = new XMLHttpRequest();
+            xhr.responseType = 'json';
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState == XMLHttpRequest.DONE) {
+                    var json_resp = xhr.response;
+                    console.log(json_resp);
+                    if (xhr.status == 200){
+                        let check_passed = json_resp["uptimeCheckResults"][0]["checkPassed"];
+                        let status = json_resp["uptimeCheckResults"][0]["httpStatus"];
+                        let latency = json_resp["uptimeCheckResults"][0]["requestLatency"];
+                        alert("checkPassed: " + check_passed + "\nhttpStatus: " + status + "\nrequestLatency: " + latency + " s");
+                    }
+                    else {
+                        alert(json_resp['error']);
+                    }
+                }
+            }
+            xhr.open('POST', '/uptime_check')
+            xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+            xhr.send(JSON.stringify(body));
+            
+
+        }
+      
+        // Access the form element...
+        const form = document.getElementById( "uptime_check" );
+      
+        // ...and take over its submit event.
+        form.addEventListener( "submit", function ( event ) {
+          event.preventDefault();
+      
+          sendData();
+        } );
+      } );
+</script>
+
+{% endblock %}

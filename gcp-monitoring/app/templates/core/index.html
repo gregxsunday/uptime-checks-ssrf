@@ -1,0 +1,62 @@
+{% extends "layout.html" %}
+{% block body %}
+
+
+<div class="mx-3 px-3">
+    <h1>README</h1>
+    <h1 id="introduction">Introduction</h1>
+<p>This lab is a simulated vulnerable Uptime Checks featrue from Google Cloud Monitoring. Here&#39;s the video that covers the theory of $31k blind SSRF that was found there:</p>
+<p><a href="https://youtu.be/ashSoc59z1Y">$31,000 Google Cloud blind SSRF + HANDS-ON labs</a></p>
+<p>The lab is only a simulation and it allows you to try your skills in writing the exploit with advanced techniques of blind data exfiltration, covered in the video. </p>
+<p>There&#39;s one exposed service that simulates the GCP console&#39;s Uptime Checks functionality and another one, not exposed from the container, that simulates the GCP metadata endpoints (a few of them to be precise).</p>
+<p>The application is free, but not bug-free. There are surely some unhandled exceptions and so on. If you encounter an interesting problem, create an issue.</p>
+<h1 id="installation">Installation</h1>
+<h2 id="option-1-git-clone-docker">Option 1: git clone + docker</h2>
+<pre><code>git clone https:<span class="hljs-comment">//github.com/gregxsunday/uptime-checks-ssrf.git</span>
+<span class="hljs-keyword">cd</span> uptime-checks-ssrf
+docker build -t gcp-ssrf .
+docker <span class="hljs-keyword">run</span> --<span class="hljs-keyword">rm</span> -p 8000:8000 --name gcp-ssrf gcp-ssrf
+</code></pre><h2 id="option-2-dockerhub">Option 2: dockerhub</h2>
+<pre><code>docker <span class="hljs-built_in">run</span> <span class="hljs-comment">--rm -p 8000:8000 gregxsunday/gcp-ssrf:latest</span>
+</code></pre><h1 id="usage">Usage</h1>
+<p>The app is exposed by default on <a href="http://localhost:8000">http://localhost:8000</a></p>
+<h2 id="important-metadata-address">Important - metadata address</h2>
+<p>The <strong>IP address 169.254.169.254 doesn&#39;t work</strong>. You must use <code>metadata.google.internal</code> domain.</p>
+<h2 id="exploring-gcp-metadata-endpoints">Exploring GCP metadata endpoints</h2>
+<p>Before leaking the data unique for different instances, I suggest leaking common data first. There are two endpoints with common data in the simulated GCP service:</p>
+<h4 id="-computemetadata-v1-instance-cpu-platform">/computeMetadata/v1/instance/cpu-platform</h4>
+<p>Always returns</p>
+<pre><code><span class="hljs-attribute">Intel Broadwell</span>
+</code></pre><h4 id="-computemetadata-v1-instance-service-accounts-default-scopes">/computeMetadata/v1/instance/service-accounts/default/scopes</h4>
+<p>Always returns</p>
+<pre><code>http<span class="hljs-variable">s:</span>//www.googleapis.<span class="hljs-keyword">com</span>/auth/devstorage.read_only
+http<span class="hljs-variable">s:</span>//www.googleapis.<span class="hljs-keyword">com</span>/auth/logging.<span class="hljs-keyword">write</span>
+http<span class="hljs-variable">s:</span>//www.googleapis.<span class="hljs-keyword">com</span>/auth/monitoring.<span class="hljs-keyword">write</span>
+http<span class="hljs-variable">s:</span>//www.googleapis.<span class="hljs-keyword">com</span>/auth/servicecontrol
+http<span class="hljs-variable">s:</span>//www.googleapis.<span class="hljs-keyword">com</span>/auth/service.management.readonly
+http<span class="hljs-variable">s:</span>//www.googleapis.<span class="hljs-keyword">com</span>/auth/trace.<span class="hljs-keyword">append</span>
+</code></pre><p>You can, of course, also exfiltrate the directory listing (simulated, with only few endpoints)</p>
+<h3 id="access-tokens">Access tokens</h3>
+<p>Are available only under </p>
+<pre><code><span class="hljs-regexp">/computeMetadata/</span>v1<span class="hljs-regexp">/instance/</span>service-accounts<span class="hljs-regexp">/default/</span>token
+</code></pre><p>endpoint.</p>
+<h3 id="configuring-key-length-and-number-of-instances">Configuring key length and number of instances</h3>
+<pre><code class="lang-sh"><span class="hljs-keyword">export</span> KEY_LENGTH=<span class="hljs-number">64</span>
+<span class="hljs-keyword">export</span> NO_INSTANCES=<span class="hljs-number">4</span>
+</code></pre>
+<p>By default, all tokens are 64 characters long and there are only 4 instances, opposed to 213 characters and 54 instances in real-life. The reason is, that, of course, there&#39;s only a simulation (namely <code>random.choice</code>) of load balancing. In reality, all the traffic goes to one backend instance. Thus, when 54 instances are simulated it takes much longer than it took in real-world, with requests being distributed. However, those parameters can be modified accoring to your preference and machine parameters. You can change those values in the <code>.env</code> file. You can&#39;t change this when using dockerhub image.</p>
+<h1 id="differences-between-this-lab-and-real-uptime-checks">Differences between this lab and real Uptime Checks</h1>
+<p>Of course, this is not 1:1 replicated and there are no real GCP instances running. The task is simulated so you can check if you would be able to write the exploit for it. Differences between the real-world include:</p>
+<ul>
+<li><strong>important</strong> - 169.254.169.254 address doesn&#39;t work. To reach the metadata endpoints use <code>metadata.google.internal</code> domain</li>
+<li>front-end - it&#39;s not beautiful, but if you want to solve the task, you shouldn&#39;t care about it,</li>
+<li>token length - by default 64 characters, instead of 213. You can change it in <code>.env</code> file</li>
+<li>number of metadata instances - by default 4 instances, instead of 54. You can change it in <code>.env</code> file</li>
+<li>not all options from real Uptime Checks are considered, only the relevant parameters are implemented</li>
+<li>only a few endpoints from GCP metadata service are implemented, as described in former chapter. 
+# </li>
+</ul>
+
+</div>
+
+{% endblock %}

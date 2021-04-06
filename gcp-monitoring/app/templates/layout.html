@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block layout %}
+<body>
+    <header>
+      <style>
+        .navbar{
+          margin-left: 20px;
+        }
+      </style>
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <a class="navbar-brand" href="#">&#9;BBRE Cloud Monitoring Sevice - Uptime Checks blind SSRF - BETA</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+              <span class="navbar-toggler-icon"></span>
+            </button>
+          
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+              <ul class="navbar-nav mr-auto">
+                <li class="nav-item active">
+                  <a class="nav-link {% if nav == 'readme' %}active{% endif %}" href="/">README<span class="sr-only"></span></a>
+                </li>
+                <li class="nav-item active">
+                  <a class="nav-link {% if nav == 'uptime_check' %}active{% endif %}" href="{{url_for('core.uptime_check')}}">Create Uptime Check<span class="sr-only"></span></a>
+                </li>
+                <li class="nav-item active">
+                  <a class="nav-link" href="https://www.buymeacoffee.com/bountyexplained">Buy Me A Coffe<span class="sr-only"></span></a>
+                </li>
+              </ul>
+            </div>
+          </nav>
+    </header>
+    <article>
+        {% block body %}{% endblock %}
+    </article>
+    <footer></footer>
+</body>
+{% endblock %}
