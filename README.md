@@ -58,8 +58,11 @@ Are available only under
 ```
 /computeMetadata/v1/instance/service-accounts/default/token
 ```
-endpoint.
-
+endpoint. By default, it returns JSON in such form:
+```
+{"access_token":"' + key + '","expires_in":3600,"token_type":"Bearer"}
+```
+where `key` is by default 64 characters long (length can be changed) string from lowercase and uppercase letters, digits and `._\`. 
 ### Configuring key length and number of instances
 ```sh
 export KEY_LENGTH=64
